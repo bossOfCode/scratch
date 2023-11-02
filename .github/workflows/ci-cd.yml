@@ -17,7 +17,7 @@ permissions:
     pull-requests: write # comment on released pull requests
 
 jobs:
-    ci-cd:
+    setup:
         runs-on: ubuntu-latest
         env:
             TRIGGER_DEPLOY: ${{ startsWith(github.ref, 'refs/heads/master') }}
@@ -76,14 +76,19 @@ jobs:
               uses: actions/upload-artifact@v3
               with:
                 name: android-builds
-                path: ./test-result/*
+                path: ./test-results/*
     test-unit:
-        needs: ci-cd
+        needs: setup
         runs-on: ubuntu-latest
         steps:
             - run: echo "test-unit"
+    build:
+        needs: setup
+        runs-on: ubuntu-latest
+        steps:
+            - run: echo "build"
     test-integration:
-        needs: ci-cd
+        needs: build
         runs-on: ubuntu-latest
         steps: 
             - run: echo "test-integration"
