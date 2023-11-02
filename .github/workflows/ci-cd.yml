@@ -21,6 +21,9 @@ jobs:
         runs-on: ubuntu-latest
         env:
             TRIGGER_DEPLOY: ${{ startsWith(github.ref, 'refs/heads/master') }}
+            DETECT_CHROMEDRIVER_VERSION: "true"
+            JEST_JUNIT_OUTPUT_DIR: test-results
+            NODE_OPTIONS: --max-old-space-size=4000
         steps:
             - uses: actions/checkout@v4
             - uses: wagoid/commitlint-github-action@v5
@@ -29,7 +32,6 @@ jobs:
               with:
                   cache: "npm"
                   node-version-file: ".nvmrc"
-
             - name: Info
               run: |
                   cat <<EOF
@@ -38,48 +40,81 @@ jobs:
                   GitHub ref: ${{ github.ref }}
                   GitHub head ref: ${{ github.head_ref }}
                   EOF
-
+            - name: Install Chrome Dependencies
+              run: |
+                sudo apt-get update
+                sudo apt-get install -y libgconf-2-4 libatk1.0-0 libatk-bridge2.0-0 libgdk-pixbuf2.0-0 libgtk-3-0 libgbm-dev libnss3-dev libxss-dev libasound2
             - name: Install Google Chrome
               uses: browser-actions/setup-chrome@v1
               with:
-                  chrome-version: beta
+                  chrome-version: stable
               id: setup-chrome
-
             - name: Chrome Info
               run: |
                   echo Installed chromium version: ${{ steps.setup-chrome.outputs.chrome-version }}
                   ${{ steps.setup-chrome.outputs.chrome-path }} --version
-
-            - name: Install dependencies
-              run: npm ci
-
-            - name: Setup & Test
-              run: |
-                  mkdir -p ./test/results
-                  npm test
-
-            - name: Generate release version
-              run: |
-                  export RELEASE_TIMESTAMP=$(date +'%Y%m%d%H%M%S')
-                  export VPKG=$($(npm bin)/json -f package.json version)
-                  export VERSION=${VPKG}-prerelease.${RELEASE_TIMESTAMP}
-
-                  echo "RELEASE_VERSION=${VERSION}" >> $GITHUB_ENV
-
-                  if [[ "${GITHUB_REF##*/}" == hotfix/* ]]; then
-                    echo "NPM_TAG=hotfix" >> $GITHUB_ENV
-                  else
-                    echo "NPM_TAG=latest" >> $GITHUB_ENV
-                  fi
-
-            - name: Build
-              run: |
-                  npm run build
-                  npm --no-git-tag-version version $RELEASE_VERSION
-
-            - name: Semantic release (configured to run dry if branch is other than 'master')
+            - name: Cache node modules
+              id: cache-nodemodules
+              uses: actions/cache@v2
               env:
-                  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                cache-name: cache-node-modules
+              with:
+                # caching node_modules
+                path: node_modules
+                key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+                restore-keys: |
+                    ${{ runner.os }}-build-${{ env.cache-name }}-
+                    ${{ runner.os }}-build-
+                    ${{ runner.os }}-
+            - name: Install Dependencies
+              if: steps.cache-nodemodules.outputs.cache-hit != 'true'
+              run: npm ci
+            - name: Lint
               run: |
-                  npx --no -- semantic-release $([[ "$TRIGGER_DEPLOY" == "false" ]] && echo "--dry-run")
+                npm run test:lint -- --quiet --output-file test-results/eslint-results.xml --format junit
+            - name: Store Lint Artifacts
+              uses: actions/upload-artifact@v3
+              with:
+                name: android-builds
+                path: ./test-result/*
+    test-unit:
+        needs: ci-cd
+        runs-on: ubuntu-latest
+        steps:
+            - run: echo "test-unit"
+    test-integration:
+        needs: ci-cd
+        runs-on: ubuntu-latest
+        steps: 
+            - run: echo "test-integration"
+
+            # - name: Setup & Test
+            #   run: |
+            #       mkdir -p ./test/results
+            #       npm test
+
+            # - name: Generate release version
+            #   run: |
+            #       export RELEASE_TIMESTAMP=$(date +'%Y%m%d%H%M%S')
+            #       export VPKG=$($(npm bin)/json -f package.json version)
+            #       export VERSION=${VPKG}-prerelease.${RELEASE_TIMESTAMP}
+
+            #       echo "RELEASE_VERSION=${VERSION}" >> $GITHUB_ENV
+
+            #       if [[ "${GITHUB_REF##*/}" == hotfix/* ]]; then
+            #         echo "NPM_TAG=hotfix" >> $GITHUB_ENV
+            #       else
+            #         echo "NPM_TAG=latest" >> $GITHUB_ENV
+            #       fi
+
+            # - name: Build
+            #   run: |
+            #       npm run build
+            #       npm --no-git-tag-version version $RELEASE_VERSION
+
+            # - name: Semantic release (configured to run dry if branch is other than 'master')
+            #   env:
+            #       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+            #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            #   run: |
+            #       npx --no -- semantic-release $([[ "$TRIGGER_DEPLOY" == "false" ]] && echo "--dry-run")
