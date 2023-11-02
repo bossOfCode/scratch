@@ -55,7 +55,7 @@ jobs:
                   ${{ steps.setup-chrome.outputs.chrome-path }} --version
             - name: Cache node modules
               id: cache-nodemodules
-              uses: actions/cache@v2
+              uses: actions/cache@v3
               env:
                 cache-name: cache-node-modules
               with:
@@ -75,22 +75,31 @@ jobs:
             - name: Store Lint Artifacts
               uses: actions/upload-artifact@v3
               with:
-                name: android-builds
+                name: test-output
                 path: ./test-results/*
     test-unit:
         needs: setup
         runs-on: ubuntu-latest
         steps:
+            - uses: actions/checkout@v4
             - run: echo "test-unit"
+            - name: Restore Cache
+              uses: actions/cache/restore@v3
+              with:
+                path: |
+                    ./node_modules
+                key: key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
     build:
         needs: setup
         runs-on: ubuntu-latest
         steps:
+            - uses: actions/checkout@v4
             - run: echo "build"
     test-integration:
         needs: build
         runs-on: ubuntu-latest
         steps: 
+            - uses: actions/checkout@v4
             - run: echo "test-integration"
 
             # - name: Setup & Test
