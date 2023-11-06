@@ -47,7 +47,9 @@ jobs:
                 cache-name: ${{ secrets.CACHE_NAME }}
               with:
                 # caching node_modules
-                path: node_modules
+                path: 
+                    node_modules
+                    static/microbit
                 key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
             - name: Install Dependencies
               if: steps.cache-nodemodules.outputs.cache-hit != 'true'
