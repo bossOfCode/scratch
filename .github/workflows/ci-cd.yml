@@ -106,6 +106,7 @@ jobs:
                 node-version-file: ".nvmrc"
             - name: Install Dependencies
               run: npm install
+            - run: npm list
             - run: npm run build
             # - name: Setup & Test
             #   run: |
