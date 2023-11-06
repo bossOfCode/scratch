@@ -84,7 +84,7 @@ jobs:
         needs: setup
         env: 
             NODE_ENV: production
-            NODE_OPTIONS: --max-old-space-size=4000 --openssl-legacy-provider
+            NODE_OPTIONS: --max-old-space-size=4000
             DETECT_CHROMEDRIVER_VERSION: "true"
         runs-on: ubuntu-latest
         steps:
