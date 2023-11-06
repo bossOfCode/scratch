@@ -93,9 +93,7 @@ jobs:
               uses: actions/cache@v3
               with:
                 path: 
-                    node_modules
-                    src/generated
-                    static/microbit
+                    ./
                 key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
             - run: npm list
             - run: ls -la src/generated
