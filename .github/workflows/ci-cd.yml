@@ -1,10 +1,8 @@
 name: CI/CD
 
 on:
-    workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
-    pull_request: # Runs whenever a pull request is created or updated
+    workflow_dispatch:
     push: # Runs whenever a commit is pushed to the repository
-        branches: [master, develop, beta, hotfix/*]
 
 concurrency:
     group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
@@ -104,8 +102,6 @@ jobs:
             - name: Install Dependencies
               run: npm ci
             - run: npm run build
-
-
             # - name: Setup & Test
             #   run: |
             #       mkdir -p ./test/results
