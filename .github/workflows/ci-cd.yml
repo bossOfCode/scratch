@@ -51,7 +51,7 @@ jobs:
                 key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
             - name: Install Dependencies
               if: steps.cache-nodemodules.outputs.cache-hit != 'true'
-              run: npm ci
+              run: npm install
             - name: Lint
               run: |
                 npm run test:lint -- --quiet --output-file test-results/eslint-results.xml --format junit
@@ -78,6 +78,7 @@ jobs:
         needs: setup
         env: 
             NODE_ENV: production
+            NODE_OPTIONS: --max-old-space-size=4000
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
