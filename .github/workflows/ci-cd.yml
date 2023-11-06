@@ -101,24 +101,8 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
-            - name: Retrieve Node Modules
-              uses: actions/cache@v3
-              with:
-                path: 
-                    node_modules
-                key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-            - name: Retrieve Microbit
-              uses: actions/cache@v3
-              with:
-                path: 
-                    static/microbit
-                key: ${{ runner.os }}-microbit-${{ hashFiles('package-lock.json') }}
-            - name: Retrieve Generated
-              uses: actions/cache@v3
-              with:
-                path: 
-                    src/generated
-                key: ${{ runner.os }}-generated-${{ hashFiles('package-lock.json') }}
+            - name: Install Dependencies
+              run: npm ci
             - run: npm run build
 
 
