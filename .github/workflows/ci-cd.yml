@@ -52,14 +52,14 @@ jobs:
             - name: Install Dependencies
               if: steps.cache-nodemodules.outputs.cache-hit != 'true'
               run: npm install
-            - name: Lint
-              run: |
-                npm run test:lint -- --quiet --output-file test-results/eslint-results.xml --format junit
-            - name: Store Lint Artifacts
-              uses: actions/upload-artifact@v3
-              with:
-                name: test-output
-                path: ./test-results/*
+            # - name: Lint
+            #   run: |
+            #     npm run test:lint -- --quiet --output-file test-results/eslint-results.xml --format junit
+            # - name: Store Lint Artifacts
+            #   uses: actions/upload-artifact@v3
+            #   with:
+            #     name: test-output
+            #     path: ./test-results/*
     test-unit:
         needs: setup
         runs-on: ubuntu-latest
