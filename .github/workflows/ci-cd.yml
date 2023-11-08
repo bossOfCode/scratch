@@ -50,7 +50,7 @@ jobs:
             - name: Install Dependencies
               if: steps.cache-nodemodules.outputs.cache-hit != 'true'
               run: npm ci
-            - run: mkdirp test/eslint
+            - run: mkdir -p test-results/eslint
             - name: Lint
               run: |
                 npm run test:lint -- --quiet --output-file test-results/eslint/results.xml
