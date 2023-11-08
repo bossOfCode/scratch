@@ -46,43 +46,19 @@ jobs:
               with:
                 path: 
                     node_modules
-                    src/generated
-                    static/microbit
                 key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-            - name: Store Microbit
-              uses: actions/upload-artifact@v3
-              with:
-                path: static/microbit
-            - name: Store Generated
-              uses: actions/upload-artifact@v3
-              with:
-                path: src/generated
-    
-            # - name: Cache microbit
-            #   id: cache-microbit
-            #   uses: actions/cache@v3
-            #   with:
-            #     path: 
-            #         static/microbit
-            #     key: ${{ runner.os }}-microbit-${{ hashFiles('package-lock.json') }}
-            # - name: Cache node modules
-            #   id: cache-generated
-            #   uses: actions/cache@v3
-            #   with:
-            #     path: 
-            #         src/generated
-            #     key: ${{ runner.os }}-generated-${{ hashFiles('package-lock.json') }}
             - name: Install Dependencies
               if: steps.cache-nodemodules.outputs.cache-hit != 'true'
               run: npm ci
-            # - name: Lint
-            #   run: |
-            #     npm run test:lint -- --quiet --output-file test-results/eslint-results.xml --format junit
-            # - name: Store Lint Artifacts
-            #   uses: actions/upload-artifact@v3
-            #   with:
-            #     name: test-output
-            #     path: ./test-results/*
+            - run: mkdirp test/eslint
+            - name: Lint
+              run: |
+                npm run test:lint -- --quiet --output-file test-results/eslint/results.xml
+            - name: Store Lint Artifacts
+              uses: actions/upload-artifact@v3
+              with:
+                name: test-output
+                path: ./test-results/*
     # test-unit:
     #     needs: setup
     #     runs-on: ubuntu-latest
@@ -113,13 +89,12 @@ jobs:
               with:
                 cache: "npm"
                 node-version-file: ".nvmrc"
-            - uses: actions/cache@v3
-              with:
-                path: 
-                    node_modules
-                key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-            - name: Download all workflow run artifacts
-              uses: actions/download-artifact@v3
+            # - uses: actions/cache@v3
+            #   with:
+            #     path: 
+            #         node_modules
+            #     key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+            - run: npm install
             - run: npm run build
 
             
