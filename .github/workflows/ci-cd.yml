@@ -118,4 +118,4 @@ jobs:
             #         static/microbit
             #     key: ${{ runner.os }}-microbit-${{ hashFiles('package-lock.json') }}
             - name: Run Build
-              run: node list
+              run: npm list
