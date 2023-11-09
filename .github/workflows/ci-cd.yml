@@ -43,34 +43,32 @@ jobs:
             - name: Lint
               run: |
                 npm run test:lint -- --quiet --output-file test-results/eslint/results.xml --format junit
-            # - name: Store Lint Results
-            #   uses: actions/upload-artifact@v3
-            #   with:
-            #     name: test-output
-            #     path: ./test-results/*
-            - name: Cache node modules
+            - name: Store Lint Results
+              uses: actions/upload-artifact@v3
+              with:
+                name: test-output
+                path: ./test-results/*
+            - name: Cache node_modules
               id: cache-nodemodules
               uses: actions/cache@v3
               with:
                 path: 
                     node_modules
-                    static/microbit
-                    src/generated
                 key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-            # - name: Cache generated
-            #   id: cache-generated
-            #   uses: actions/cache@v3
-            #   with:
-            #     path: 
-            #         src/generated
-            #     key: ${{ runner.os }}-generated-${{ hashFiles('package-lock.json') }}
-            # - name: Cache generated
-            #   id: cache-static
-            #   uses: actions/cache@v3
-            #   with:
-            #     path: 
-            #         static/microbit
-            #     key: ${{ runner.os }}-microbit-${{ hashFiles('package-lock.json') }}
+            - name: Cache src/generated
+              id: cache-generated
+              uses: actions/cache@v3
+              with:
+                path: 
+                    src/generated
+                key: ${{ runner.os }}-generated-${{ hashFiles('package-lock.json') }}
+            - name: Cache static/microbit
+              id: cache-static
+              uses: actions/cache@v3
+              with:
+                path: 
+                    static/microbit
+                key: ${{ runner.os }}-microbit-${{ hashFiles('package-lock.json') }}
     # test-unit:
     #     needs: setup
     #     runs-on: ubuntu-latest
@@ -100,22 +98,23 @@ jobs:
               with:
                 cache: "npm"
                 node-version-file: ".nvmrc"
-            - uses: actions/cache@v3
+            - name: Retrieve node_modules
+              uses: actions/cache@v3
               with:
                 path: 
                     node_modules
-                    static/microbit
-                    src/generated
                 key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-            # - uses: actions/cache@v3
-            #   with:
-            #     path: 
-            #         src/generated
-            #     key: ${{ runner.os }}-generated-${{ hashFiles('package-lock.json') }}
-            # - uses: actions/cache@v3
-            #   with:
-            #     path: 
-            #         static/microbit
-            #     key: ${{ runner.os }}-microbit-${{ hashFiles('package-lock.json') }}
+            - name: Retrieve src/generated
+              uses: actions/cache@v3
+              with:
+                path: 
+                    src/generated
+                key: ${{ runner.os }}-generated-${{ hashFiles('package-lock.json') }}
+            - name: Retireve static/microbit
+              uses: actions/cache@v3
+              with:
+                path: 
+                    static/microbit
+                key: ${{ runner.os }}-microbit-${{ hashFiles('package-lock.json') }}
             - name: Run Build
-              run: npm list
+              run: npm run build
