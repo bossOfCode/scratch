@@ -43,33 +43,34 @@ jobs:
             - name: Lint
               run: |
                 npm run test:lint -- --quiet --output-file test-results/eslint/results.xml --format junit
-                #         - name: Store Lint Artifacts
-            - name: Store Lint Results
-              uses: actions/upload-artifact@v3
-              with:
-                name: test-output
-                path: ./test-results/*
+            # - name: Store Lint Results
+            #   uses: actions/upload-artifact@v3
+            #   with:
+            #     name: test-output
+            #     path: ./test-results/*
             - name: Cache node modules
               id: cache-nodemodules
               uses: actions/cache@v3
               with:
                 path: 
                     node_modules
-                key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-            - name: Cache generated
-              id: cache-generated
-              uses: actions/cache@v3
-              with:
-                path: 
-                    src/generated
-                key: ${{ runner.os }}-generated-${{ hashFiles('package-lock.json') }}
-            - name: Cache generated
-              id: cache-static
-              uses: actions/cache@v3
-              with:
-                path: 
                     static/microbit
-                key: ${{ runner.os }}-microbit-${{ hashFiles('package-lock.json') }}
+                    src/generated
+                key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+            # - name: Cache generated
+            #   id: cache-generated
+            #   uses: actions/cache@v3
+            #   with:
+            #     path: 
+            #         src/generated
+            #     key: ${{ runner.os }}-generated-${{ hashFiles('package-lock.json') }}
+            # - name: Cache generated
+            #   id: cache-static
+            #   uses: actions/cache@v3
+            #   with:
+            #     path: 
+            #         static/microbit
+            #     key: ${{ runner.os }}-microbit-${{ hashFiles('package-lock.json') }}
     # test-unit:
     #     needs: setup
     #     runs-on: ubuntu-latest
@@ -95,7 +96,6 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
-            - uses: wagoid/commitlint-github-action@v5
             - uses: actions/setup-node@v3
               with:
                 cache: "npm"
@@ -104,16 +104,18 @@ jobs:
               with:
                 path: 
                     node_modules
-                key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-            - uses: actions/cache@v3
-              with:
-                path: 
-                    src/generated
-                key: ${{ runner.os }}-generated-${{ hashFiles('package-lock.json') }}
-            - uses: actions/cache@v3
-              with:
-                path: 
                     static/microbit
-                key: ${{ runner.os }}-microbit-${{ hashFiles('package-lock.json') }}
+                    src/generated
+                key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+            # - uses: actions/cache@v3
+            #   with:
+            #     path: 
+            #         src/generated
+            #     key: ${{ runner.os }}-generated-${{ hashFiles('package-lock.json') }}
+            # - uses: actions/cache@v3
+            #   with:
+            #     path: 
+            #         static/microbit
+            #     key: ${{ runner.os }}-microbit-${{ hashFiles('package-lock.json') }}
             - name: Run Build
               run: npm run build
