@@ -38,27 +38,38 @@ jobs:
                   GitHub ref: ${{ github.ref }}
                   GitHub head ref: ${{ github.head_ref }}
                   EOF
-            - name: Cache node modules
-              id: cache-nodemodules
-              uses: actions/cache@v3
-              env:
-                cache-name: ${{ secrets.CACHE_NAME }}
-              with:
-                path: 
-                    node_modules
-                key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
             - name: Install Dependencies
-              if: steps.cache-nodemodules.outputs.cache-hit != 'true'
-              run: npm ci
-            - run: mkdir -p test-results/eslint
+              run: npm install
             - name: Lint
               run: |
-                npm run test:lint -- --quiet --output-file test-results/eslint/results.xml
-            - name: Store Lint Artifacts
+                npm run test:lint -- --quiet --output-file test-results/eslint/results.xml --format junit
+                #         - name: Store Lint Artifacts
+            - name: Store Lint Results
               uses: actions/upload-artifact@v3
               with:
                 name: test-output
                 path: ./test-results/*
+            - name: Cache node modules
+              id: cache-nodemodules
+              uses: actions/cache@v3
+              with:
+                path: 
+                    node_modules
+                key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+            - name: Cache generated
+              id: cache-generated
+              uses: actions/cache@v3
+              with:
+                path: 
+                    src/generated
+                key: ${{ runner.os }}-generated-${{ hashFiles('package-lock.json') }}
+            - name: Cache generated
+              id: cache-static
+              uses: actions/cache@v3
+              with:
+                path: 
+                    static/microbit
+                key: ${{ runner.os }}-microbit-${{ hashFiles('package-lock.json') }}
     # test-unit:
     #     needs: setup
     #     runs-on: ubuntu-latest
@@ -89,42 +100,20 @@ jobs:
               with:
                 cache: "npm"
                 node-version-file: ".nvmrc"
-            # - uses: actions/cache@v3
-            #   with:
-            #     path: 
-            #         node_modules
-            #     key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-            - run: npm install
-            - run: npm run build
-
-            
-            # - name: Setup & Test
-            #   run: |
-            #       mkdir -p ./test/results
-            #       npm test
-
-            # - name: Generate release version
-            #   run: |
-            #       export RELEASE_TIMESTAMP=$(date +'%Y%m%d%H%M%S')
-            #       export VPKG=$($(npm bin)/json -f package.json version)
-            #       export VERSION=${VPKG}-prerelease.${RELEASE_TIMESTAMP}
-
-            #       echo "RELEASE_VERSION=${VERSION}" >> $GITHUB_ENV
-
-            #       if [[ "${GITHUB_REF##*/}" == hotfix/* ]]; then
-            #         echo "NPM_TAG=hotfix" >> $GITHUB_ENV
-            #       else
-            #         echo "NPM_TAG=latest" >> $GITHUB_ENV
-            #       fi
-
-            # - name: Build
-           #   run: |
-            #       npm run build
-            #       npm --no-git-tag-version version $RELEASE_VERSION
-
-            # - name: Semantic release (configured to run dry if branch is other than 'master')
-            #   env:
-            #       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-            #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            #   run: |
-            #       npx --no -- semantic-release $([[ "$TRIGGER_DEPLOY" == "false" ]] && echo "--dry-run")
+            - uses: actions/cache@v3
+              with:
+                path: 
+                    node_modules
+                key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+            - uses: actions/cache@v3
+              with:
+                path: 
+                    src/generated
+                key: ${{ runner.os }}-generated-${{ hashFiles('package-lock.json') }}
+            - uses: actions/cache@v3
+              with:
+                path: 
+                    static/microbit
+                key: ${{ runner.os }}-microbit-${{ hashFiles('package-lock.json') }}
+            - name: Run Build
+              run: npm run build
